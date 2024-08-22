@@ -1,109 +1,123 @@
--- Table creation
-CREATE TABLE Panel (
-    PMID INT PRIMARY KEY,
-    Type VARCHAR(10),
-    Price INT,
-    Warranty INT
+CREATE TABLE panel (
+PV_module VARCHAR(50) PRIMARY KEY,
+Type VARCHAR(50),
+Price INT,
+Warranty INT
 );
-
-CREATE TABLE Vendor (
-    TIN INT PRIMARY KEY,
-    Name VARCHAR(10),
-    Contact INT,
-    Address VARCHAR(20)
+INSERT INTO panel (PV_module, Type, Price, Warranty)
+VALUES ('PV001', 'Mono', 40000, 15);
+INSERT INTO panel (PV_module, Type, Price, Warranty)
+VALUES ('PV002', 'Poly', 60000, 25);
+INSERT INTO panel (PV_module, Type, Price, Warranty)
+VALUES ('PV003', 'Mono', 42000, 15);
+INSERT INTO panel (PV_module, Type, Price, Warranty)
+VALUES ('PV004', 'Mono', 38000, 15);
+INSERT INTO panel (PV_module, Type, Price, Warranty)VALUES ('PV005', 'Poly', 58000, 25);
+--------------------------------
+CREATE TABLE user (
+H_no INT PRIMARY KEY,
+Name VARCHAR(100),
+Address VARCHAR(255)
 );
-
-CREATE TABLE User (
-    HNO INT PRIMARY KEY,
-    Address VARCHAR(20)
+INSERT INTO user (H_no, Name, Address)
+VALUES (201, 'John Smith', 'Green Street, Ecoville');
+INSERT INTO user (H_no, Name, Address)
+VALUES (202, 'Jane Doe', 'Sunset Avenue, Solarville');
+INSERT INTO user (H_no, Name, Address)
+VALUES (203, 'Robert Johnson', 'Wind Way, Windy City');
+INSERT INTO user (H_no, Name, Address)
+VALUES (204, 'Emily Davis', 'Sunny Lane, Sunshine Ville');
+INSERT INTO user (H_no, Name, Address)
+VALUES (205, 'Michael Wilson', 'Renewable Road, Green Valley');
+--------------------------------
+CREATE TABLE vendor (
+Tin_no INT PRIMARY KEY,
+Name VARCHAR(100),
+Contact VARCHAR(15),
+Address VARCHAR(255)
 );
-
-CREATE TABLE Install (
-    PMID INT REFERENCES Panel(PMID),
-    TIN INT REFERENCES Vendor(TIN),
-    HNO INT REFERENCES User(HNO),
-    Type VARCHAR(20),
-    Date DATE,
-    Charge INT,
-    Capacity VARCHAR(20),
-    NoOfInstall INT,
-    PRIMARY KEY(PMID, TIN, HNO)
+INSERT INTO vendor (Tin_no, Name, Contact, Address)
+VALUES (101, 'Raju', '1234567890', 'Sunrise Street');INSERT INTO vendor (Tin_no, Name, Contact, Address)
+VALUES (102, 'Manju', '9876543210', 'Eco Avenue');
+INSERT INTO vendor (Tin_no, Name, Contact, Address)
+VALUES (103, 'Ramesh', '8765432109', 'Sunny Road');
+INSERT INTO vendor (Tin_no, Name, Contact, Address)
+VALUES (104, 'Sumesh', '7654321098', 'Renewable Lane');
+INSERT INTO vendor (Tin_no, Name, Contact, Address)
+VALUES (105, 'Satish', '6543210987', 'Solar Blvd');
+--------------------------------
+CREATE TABLE install (
+Capacity INT,
+Inst_date DATE,
+Place VARCHAR(50),
+H_no INT,
+PV_module VARCHAR(50),
+Tin_no INT,
+foreign key(H_no) references user(H_no),
+foreign key(PV_module) references panel(PV_module),
+foreign key(Tin_no) references vendor(Tin_no)
 );
+INSERT INTO install (Capacity, Inst_date, Place, H_no, PV_module, Tin_no)
+VALUES (4, '2023-01-10', 'Dom', 201, 'PV001', 101);
+INSERT INTO install (Capacity, Inst_date, Place, H_no, PV_module, Tin_no)
+VALUES (6, '2022-10-22', 'Dom', 201, 'PV001', 105);
+INSERT INTO install (Capacity, Inst_date, Place, H_no, PV_module, Tin_no)
+VALUES (6, '2022-07-20', 'Dom', 201, 'PV002', 102);
+INSERT INTO install (Capacity, Inst_date, Place, H_no, PV_module, Tin_no)
+VALUES (4, '2022-08-10', 'Dom', 201, 'PV003', 103);INSERT INTO install (Capacity, Inst_date, Place, H_no, PV_module, Tin_no)
+VALUES (5, '2022-09-20', 'Dom', 202, 'PV001', 101);
+INSERT INTO install (Capacity, Inst_date, Place, H_no, PV_module, Tin_no)
+VALUES (6, '2022-05-15', 'Com', 202, 'PV002', 102);
+INSERT INTO install (Capacity, Inst_date, Place, H_no, PV_module, Tin_no)
+VALUES (5, '2023-03-05', 'Com', 202, 'PV004', 101);
+INSERT INTO install (Capacity, Inst_date, Place, H_no, PV_module, Tin_no)
+VALUES (3, '2023-06-12', 'Com', 202, 'PV004', 105);
+INSERT INTO install (Capacity, Inst_date, Place, H_no, PV_module, Tin_no)
+VALUES (4, '2022-11-15', 'Dom', 203, 'PV002', 102);
+INSERT INTO install (Capacity, Inst_date, Place, H_no, PV_module, Tin_no)
+VALUES (7, '2023-05-18', 'Dom', 203, 'PV003', 103);
+INSERT INTO install (Capacity, Inst_date, Place, H_no, PV_module, Tin_no)
+VALUES (3, '2023-02-25', 'Dom', 203, 'PV004', 105);
+INSERT INTO install (Capacity, Inst_date, Place, H_no, PV_module, Tin_no)
+VALUES (8, '2022-12-05', 'Com', 204, 'PV003', 103);
+INSERT INTO install (Capacity, Inst_date, Place, H_no, PV_module, Tin_no)
+VALUES (8, '2023-06-30', 'Com', 204, 'PV004', 105);
+INSERT INTO install (Capacity, Inst_date, Place, H_no, PV_module, Tin_no)
+VALUES (5, '2023-07-08', 'Com', 205, 'PV001', 104);
+INSERT INTO install (Capacity, Inst_date, Place, H_no, PV_module, Tin_no)
+VALUES (7, '2023-04-18', 'Dom', 205, 'PV005', 104);
 
--- Insert data
-INSERT INTO Panel (PMID, Type, Price, Warranty) VALUES
-(1, 'mono', 300, 10),
-(2, 'poly', 250, 8),
-(3, 'mono', 350, 12),
-(4, 'poly', 280, 10),
-(5, 'mono', 400, 15),
-(6, 'poly', 220, 7);
 
-INSERT INTO Vendor (TIN, Name, Contact, Address) VALUES
-(101, 'VendorA', 123456, 'chennai'),
-(102, 'VendorB', 987654, 'belgum'),
-(103, 'VendorC', 543210, 'delhi'),
-(104, 'VendorD', 678901, 'mumbai'),
-(105, 'VendorE', 234567, 'kolkata');
 
-INSERT INTO User (HNO, Address) VALUES
-(201, 'hubli'),
-(202, 'banglore'),
-(203, 'pune'),
-(204, 'hyderabad'),
-(205, 'chandigarh');
 
-INSERT INTO Install (PMID, TIN, HNO, Type, Date, Charge, Capacity, NoOfInstall) VALUES
-(1, 101, 201, 'domestic', '2023-01-01', 5000, 3, 2),
-(2, 101, 202, 'commercial', '2023-02-01', 4000, 4, 1),
-(1, 102, 201, 'commercial', '2023-03-01', 5000, 5, 3),
-(2, 102, 202, 'domestic', '2023-04-01', 4000, 1, 2),
-(3, 103, 203, 'commercial', '2023-05-01', 5500, 5, 4),
-(4, 103, 204, 'domestic', '2023-06-01', 4500, 7, 2),
-(5, 104, 205, 'domestic', '2023-07-01', 6000, 4, 3),
-(6, 104, 203, 'commercial', '2023-08-01', 3500, 3, 5),
-(3, 105, 204, 'domestic', '2023-09-01', 5500, 8, 2),
-(4, 105, 205, 'commercial', '2023-10-01', 4700, 2, 1);
 
--- Query execution
 
--- 1) List all distributors with installation counts in domestic places, ordered by count
-SELECT V.Name, COUNT(*) AS Installation_Count
-FROM Install I
-JOIN Vendor V ON I.TIN = V.TIN
-WHERE I.Type = 'domestic'
-GROUP BY V.Name
-ORDER BY Installation_Count DESC;
 
--- 2) List all place names with panel capacities, ordered by capacity
-SELECT U.Address AS Place_Name
-FROM Install I
-JOIN User U ON I.HNO = U.HNO
-ORDER BY I.Capacity DESC;
 
--- 3) Display the area where monocrystalline panels are installed
-SELECT DISTINCT U.Address AS Area
-FROM Install I
-JOIN User U ON I.HNO = U.HNO
-JOIN Panel P ON I.PMID = P.PMID
-WHERE P.Type = 'mono';
 
--- 4) For the specific area, display the total installation charges for both types of panels
-SELECT I.Type, SUM(I.Charge) AS Total_Charge
-FROM Install I
-JOIN User U ON I.HNO = U.HNO
-WHERE U.Address = 'hubli'
-GROUP BY I.Type;
 
--- 5) List all details of distributors and panels with installation dates, ordered by oldest installations
-SELECT V.*, P.*, I.Date
-FROM Install I
-JOIN Vendor V ON I.TIN = V.TIN
-JOIN Panel P ON I.PMID = P.PMID
-ORDER BY I.Date ASC;
+-- 1 
+select count(*),v.name from vendor v natural join install i where i.Place='Dom'
+group by v.Tin_no having count(*)>=ALL(select count(*) from vendor natural join
+install where place='Dom' group by Name);
 
--- 6) Find the average sales of both types of panels in only commercial places
-SELECT I.Type, AVG(I.Charge) AS Average_Sales
-FROM Install I
-WHERE I.Type = 'commercial'
-GROUP BY I.Type;
+-- 2 
+select u.* from user u natural join install where Capacity = (select max(Capacity)
+from install);
+
+-- 3
+select distinct(u.Address) from user u natural join install i where u.H_no in
+(select H_no from install natural join panel p where p.Type='Mono');
+
+--4
+select sum(Price),Type from panel natural join install where H_no in (select
+H_no from user where Address='Wind Way, Windy City') group by Type;
+
+-- 5
+select PV_module, Name from vendor natural join install natural join panel
+where Inst_date in (select min(Inst_date) from install);
+
+-- 6
+select avg(Price), Type from panel natural join install where Place='Com' group
+by Type;
+
