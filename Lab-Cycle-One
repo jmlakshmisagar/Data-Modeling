@@ -1,0 +1,109 @@
+  -- 1
+SELECT e.emp_Name, e.emp_Salary, d.dept_Name
+FROM Employee e
+JOIN Department d ON e.dept_ID = d.dept_ID
+WHERE e.emp_Salary > (
+SELECT AVG(e2.emp_Salary)
+FROM Employee e2
+JOIN Department d2 ON e2.dept_ID = d2.dept_ID
+WHERE d2.dept_Name = 'Finance'
+);
+
+
+-- 2
+SELECT e.emp_Name, d.dept_Name
+FROM Employee e
+JOIN Department d ON e.dept_ID = d.dept_ID
+JOIN (
+SELECT emp_ID
+FROM Project
+WHERE dept_ID = (
+SELECT dept_ID
+FROM Department
+WHERE dept_Name = 'R&D'
+)
+GROUP BY emp_ID
+HAVING COUNT(*) > 2
+) p ON e.emp_ID = p.emp_ID
+
+
+-- 3
+SELECT p.proj_Name, d.dept_Name
+FROM Project p
+JOIN Department d ON p.dept_ID = d.dept_ID;
+
+
+-- 4
+SELECT s.sup_Name, COUNT(DISTINCT e.emp_ID) AS num_employees
+FROM Supervisor s
+JOIN Employee e ON s.sup_ID =e.supervisor_ID
+JOIN Project p ON e.emp_ID = p.emp_ID
+GROUP BY s.sup_Name
+HAVING COUNT(DISTINCT e.emp_ID) > 3 AND COUNT(DISTINCT p.proj_ID) >= 1;
+
+
+-- 5
+SELECT e.emp_Name, SUM(p.proj_Salary) AS total_salary
+FROM Employee e
+JOIN Dependent d ON e.emp_ID = d.emp_ID
+JOIN Project p ON e.emp_ID = p.emp_ID
+GROUP BY e.emp_Name
+HAVING SUM(p.proj_Salary) >= 1000000;
+
+
+-- 6
+SELECT d.dept_Name, e.emp_Name
+FROM Department d
+JOIN Project p ON d.dept_ID = p.dept_ID
+JOIN Employee e ON p.proj_ID = e.emp_ID
+GROUP BY d.dept_Name, e.emp_Name
+HAVING COUNT(DISTINCT p.proj_Location) > 1;
+
+
+
+
+
+-- Quries......
+
+CREATE TABLE Department (
+dept_ID INT PRIMARY KEY,
+dept_Name VARCHAR(50),
+dept_Number VARCHAR(50),
+manager_Start_Date DATE
+);
+CREATE TABLE Project (
+proj_ID INT PRIMARY KEY,
+proj_Name VARCHAR(50),
+proj_Number VARCHAR(50),
+proj_Location VARCHAR(50),
+dept_ID INT,
+FOREIGN KEY (dept_ID) REFERENCES Department(dept_ID)
+);
+CREATE TABLE Employee (
+emp_ID INT PRIMARY KEY,
+emp_Name VARCHAR(50),
+emp_SSN VARCHAR(50),
+emp_Address VARCHAR(100),
+emp_Salary DECIMAL(10, 2),emp_Sex VARCHAR(10),
+emp_Birth_Date DATE,
+dept_ID INT,
+supervisor_ID INT,
+FOREIGN KEY (dept_ID) REFERENCES Department(dept_ID),
+FOREIGN KEY (supervisor_ID) REFERENCES Supervisor(sup_ID)
+);
+CREATE TABLE Supervisor (
+sup_ID INT PRIMARY KEY,
+sup_Name VARCHAR(50)
+);
+CREATE TABLE Dependent (
+dep_ID INT PRIMARY KEY,
+dep_First_Name VARCHAR(50),
+dep_Sex VARCHAR(10),
+dep_Birth_Date DATE,
+dep_Relationship VARCHAR(50),
+emp_ID INT,
+FOREIGN KEY (emp_ID) REFERENCES Employee(emp_ID)
+);
+
+
+
