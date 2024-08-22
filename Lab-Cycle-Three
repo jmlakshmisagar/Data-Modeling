@@ -1,0 +1,353 @@
+// Inserting into the instruments collection
+db.instruments.insertMany([
+  { 
+    iuin: 1, 
+    name: 'guitar', 
+    key: 'A' 
+  },
+  { 
+    iuin: 3, 
+    name: 'piano', 
+    key: 'D' 
+  },
+  { 
+    iuin: 8, 
+    name: 'flute', 
+    key: 'C' 
+  },
+  { 
+    iuin: 4, 
+    name: 'violin', 
+    key: 'D' 
+  }
+]);
+
+// Inserting into the songs collection
+db.songs.insertMany([
+  { 
+    sid: 'S1', 
+    stitle: 'Title 1', 
+    author: ['Amith', 'Bharath'] 
+  },
+  { 
+    sid: 'S2', 
+    stitle: 'Title 2', 
+    author: ['Kiran'] 
+  },
+  { 
+    sid: 'S3', 
+    stitle: 'Title 3', 
+    author: ['Kumar'] 
+  },
+  { 
+    sid: 'S4', 
+    stitle: 'Title 4', 
+    author: ['Amith'] 
+  },
+  { 
+    sid: 'S5', 
+    stitle: 'Title 5', 
+    author: ['Kiran'] 
+  },
+  { 
+    sid: 'S6', 
+    stitle: 'Title 6', 
+    author: ['Linda'] 
+  },
+  { 
+    sid: 'S7', 
+    stitle: 'Title 7', 
+    author: ['Bharath'] 
+  }
+]);
+
+// Inserting into the musician collection
+db.musicians.insertMany([
+  { 
+    ssn: 'M1', 
+    name: 'Amith', 
+    address: 'Bangalore', 
+    phone: 8745214523, 
+    iuin: [1, 3, 8], 
+    sid: ['S4', 'S5'] 
+  },
+  { 
+    ssn: 'M2', 
+    name: 'Bharath', 
+    address: 'Bangalore', 
+    phone: 9874532145, 
+    iuin: [3, 8], 
+    sid: ['S1', 'S2'] 
+  },
+  { 
+    ssn: 'M3', 
+    name: 'Kiran', 
+    address: 'Mysore', 
+    phone: 8745632145, 
+    iuin: [1], 
+    sid: ['S1', 'S2'] 
+  },
+  { 
+    ssn: 'M4', 
+    name: 'Kumar', 
+    address: 'Tumkur', 
+    phone: 9874521456, 
+    iuin: [1, 3, 4, 8], 
+    sid: ['S1', 'S2', 'S4'] 
+  },
+  { 
+    ssn: 'M5', 
+    name: 'Linda', 
+    address: 'New York', 
+    phone: 1234567890, 
+    iuin: [1, 4], 
+    sid: ['S5', 'S4'] 
+  },
+  { 
+    ssn: 'M6', 
+    name: 'David', 
+    address: 'Los Angeles', 
+    phone: 9876543210, 
+    iuin: [8], 
+    sid: ['S1', 'S6'] 
+  }
+]);
+
+// Inserting into the album collection
+db.album.insertMany([
+  { 
+    auin: 'A1', 
+    title: 'Album 1', 
+    date: '2001-05-23', 
+    format: 'CD', 
+    sid: ['S1', 'S2', 'S5'], 
+    producer: 'Kumar' 
+  },
+  { 
+    auin: 'A2', 
+    title: 'Album 2', 
+    date: '2010-09-13', 
+    format: 'MC', 
+    sid: ['S3', 'S4'], 
+    producer: 'Amith' 
+  },
+  { 
+    auin: 'A3', 
+    title: 'Album 3', 
+    date: '2015-12-10', 
+    format: 'CD', 
+    sid: ['S6', 'S7'], 
+    producer: 'Bharath' 
+  }
+]);
+
+
+
+
+
+
+-- 1
+
+
+db.musician.aggregate([
+  // Unwind the sid array to have one document per song a musician has played
+  { $unwind: "$sid" },
+  
+  // Lookup to join with the songs collection
+  { 
+    $lookup: {
+      from: "songs",
+      localField: "sid",
+      foreignField: "sid",
+      as: "songDetails"
+    }
+  },
+  
+  // Unwind the songDetails array to have one document per song
+  { $unwind: "$songDetails" },
+  
+  // Lookup to join with the album collection
+  { 
+    $lookup: {
+      from: "album",
+      localField: "sid",
+      foreignField: "sid",
+      as: "albumDetails"
+    }
+  },
+  
+  // Unwind the albumDetails array to have one document per album
+  { $unwind: "$albumDetails" },
+  
+  // Group by musician name, song title, and album title
+  { 
+    $group: {
+      _id: {
+        musicianName: "$name",
+        songTitle: "$songDetails.stitle",
+        albumTitle: "$albumDetails.title"
+      }
+    }
+  },
+  
+  // Project the fields to include in the final output
+  { 
+    $project: {
+      _id: 0,
+      musicianName: "$_id.musicianName",
+      songTitle: "$_id.songTitle",
+      albumTitle: "$_id.albumTitle"
+    }
+  }
+])
+
+
+
+-- 2
+
+db.musician.aggregate([
+  {
+    $lookup: {
+      from: "album",
+      localField: "name",
+      foreignField: "producer",
+      as: "producedAlbums"
+    }
+  },
+  { 
+    $match: { 
+      "producedAlbums.0": { $exists: false } 
+    } 
+  },
+  { 
+    $project: {
+      _id: 0,
+      name: 1
+    } 
+  }
+])
+
+
+-- 3
+
+db.musician.aggregate([
+  // Unwind the sid array to have one document per song a musician has performed
+  { $unwind: "$sid" },
+  
+  // Group by song ID and count the number of musicians for each song
+  { 
+    $group: {
+      _id: "$sid",
+      musicianCount: { $sum: 1 }
+    }
+  },
+  
+  // Match songs that are performed by more than 3 musicians
+  { 
+    $match: {
+      musicianCount: { $gt: 3 }
+    }
+  },
+  
+  // Lookup to get the song details from the songs collection
+  { 
+    $lookup: {
+      from: "songs",
+      localField: "_id",
+      foreignField: "sid",
+      as: "songDetails"
+    }
+  },
+  
+  // Unwind the songDetails array to get a flat structure
+  { $unwind: "$songDetails" },
+  
+  // Project the desired fields from the songDetails
+  { 
+    $project: {
+      _id: 0,
+      sid: "$songDetails.sid",
+      stitle: "$songDetails.stitle",
+      author: "$songDetails.author",
+      musicianCount: 1
+    }
+  }
+])
+
+
+
+
+-- 4
+
+db.instrument.aggregate([
+  { 
+    $lookup: {
+      from: "musician",
+      localField: "iuin",
+      foreignField: "iuin",
+      as: "musicians"
+    }
+  },
+  { 
+    $project: {
+      _id: 0,
+      instrument_name: "$name",
+      num_musicians: { 
+        $size: "$musicians" 
+      }
+    }
+  },
+  { 
+    $group: {
+      _id: "$instrument_name",
+      average_musicians: { 
+        $avg: "$num_musicians" 
+      }
+    }
+  }
+])
+
+
+
+-- 5
+
+db.album.aggregate([
+  { 
+    $lookup: {
+      from: "musician",
+      localField: "producer",
+      foreignField: "name",
+      as: "musicians"
+    }
+  },
+  { 
+    $match: {
+      "musicians.iuin": { $all: [1, 8] }
+    }
+  },
+  { 
+    $project: {
+      _id: 0,
+      title: 1
+    }
+  }
+])
+
+
+
+
+-- 6
+
+
+db.musician.find({
+  "iuin": { 
+    "$all": db.instrument.distinct("iuin") 
+  }
+}, 
+{
+  "_id": 0
+})
+
+
+
+
